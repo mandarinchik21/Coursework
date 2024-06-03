@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Expenses</title>
+    <link rel="stylesheet" th:href="@{/css/expenses.css}" />
+    <link rel="stylesheet" href="../static/expenses.css">
+</head>
+<body>
+<div class="general-container">
+    <nav class="nav-container component">
+        <div class="nav-page border-component">
+            <p>Total amount:</p>
+            <p>10 200$</p>
+        </div>
+
+        <div class="nav-page border-component">
+            <a><span>Income</span></a>
+        </div>
+
+        <div class="nav-page border-component">
+            <a><span>History</span></a>
+        </div>
+
+        <div class="nav-page border-component">
+            <a><span>Edit</span></a>
+        </div>
+
+    </nav>
+    <div class="history-container component">
+        <div class="expenses-history border-component">
+            <p>History</p>
+            <ul class="expenses-list">
+                <li th:each="operation : ${expanses}">
+                    <p th:text="'-' + ${operation.delta} + '$'"> </p>
+                    <p th:text="${operation.expenseType}"></p>
+                </li>
+            </ul>
+        </div>
+        <div class="border-component">
+            Diagram
+        </div>
+    </div>
+
+    <div class="new-expense component border-component">
+        <div class="form-container">
+            <p>New expense</p>
+            <form class="expense-form" method="post" th:action="@{/expenses}" th:object="${newExpense}">
+                <input th:field="*{delta}" type="number" min="0.01" value="0.00" step="0.01" placeholder="Sum"/>
+                <textarea th:field="*{description}" placeholder="Text"></textarea>
+
+                <select th:field="*{familyMemberId}">
+                    <option value="" disabled selected>Select a family member</option>
+                    <option th:each="member : ${familyMembers}" th:value="${member.id}" th:text="${member.name}"></option>
+                </select>
+
+                <select th:field="*{expenseType}">
+                    <option value="" disabled selected>Select an expense category</option>
+                    <option th:each="type : ${T(com.example.coursework2_0.model.ExpenseType).values()}" th:value="${type.toString()}" th:text="${type.toString()}"></option>
+                </select>
+
+
+                <input th:field="*{operationDate}" type="date"/>
+
+                <button class="submit-button" type="submit">Save</button>
+                <button>Cancel</button>
+            </form>
+        </div>
+    </div>expense
+</div>
+</body>
+</html>

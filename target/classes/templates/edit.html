@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Incomes</title>
+    <link rel="stylesheet" th:href="@{/css/edit.css}" />
+    <link rel="stylesheet" th:href="@{/css/expenses.css}" />
+
+
+    <style>
+        *{
+            font-family: sans-serif;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            /*margin: 4% auto;*/
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            border-radius: 25px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .history{
+            display: flex;
+            flex-direction: column;
+            max-height: 100%;
+        }
+
+        .operations-list-container {
+            padding: 0 20px;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+
+
+        .close:hover,
+        .close:focus {
+            color: #54708A;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .button-container{
+            padding: 10px;
+        }
+
+        .balance{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .balance p{
+            margin: 5px;
+        }
+
+        .add-button{
+            text-align: center;
+            flex: 0;
+            font-size: 23px;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            border-radius: 25px;
+            border: 2px solid #54708A;
+            background-color: #F0F3F7;
+            color: black;
+        }
+
+        .add-button:hover{
+            background-color: #54708A;
+            color: white;
+        }
+
+        .info-container{
+            font-size: 23px;
+        }
+
+        .info-container > p {
+            text-align: center;
+        }
+
+        .standart-button{
+            padding: 10px;
+            background-color: #F0F3F7;
+            border: 2px solid #54708A;
+            color: black;
+            border-radius: 10px;
+            font-size: 23px;
+            cursor: pointer;
+        }
+
+        .standart-button:hover{
+            background-color: #54708A;
+            border: 2px solid #54708A;
+            color: white;
+        }
+
+
+    </style>
+
+    <style>
+        .expense-form{
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            flex: 1;
+            justify-content: space-around;
+        }
+
+        .operations-list > li{
+            font-size: 20px;
+            border-bottom: 2px solid gray;
+            margin: 10px 20px;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .operations-list{
+            list-style: none;
+            padding-inline-start: 0px;
+            padding: 0px;
+            margin: 10px;
+        }
+
+        .nav-page{
+            height: 18%;
+            width: 266px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 25px;
+        }
+        .nav-page > a{
+            text-decoration: none;
+            color: black;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav-page:hover > a{
+            color: white;
+        }
+
+        .nav-page:hover{
+            background-color: #54708A;
+            color: white !important;
+        }
+
+        body, html{
+            height: 100%;
+        }
+        body{
+            margin: 0;
+        }
+
+        .expense-form p{
+            margin-top: 20px;
+        }
+
+        .component{
+            margin: 40px;
+            height: 80%;
+        }
+
+        .expense-form button{
+            margin: 20px;
+            padding: 10px;
+            border: none;
+            background-color: #F0F3F7;
+            text-decoration: underline;
+            color: #54708A;
+            cursor: pointer;
+        }
+
+        .submit-button{
+            background-color: #54708A !important;
+            color: white !important;
+            border-radius: 10px !important;
+            text-decoration: none !important;
+        }
+
+
+        .history-container{
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .date-info{
+            margin: auto;
+            text-align: center;
+            position: absolute;
+        }
+
+        .new-expense{
+            text-align: center;
+            width: 30%;
+        }
+
+        .form-container{
+            display: flex;
+            flex-direction: column;
+            margin: 0px 20px 20px 20px;
+            height: 100%;
+        }
+
+        .border-component{
+            padding: 10px;
+            border-radius: 32px;
+            box-shadow: 4px 4px 20px 0px #13131354;
+            background-color: #F0F3F7;
+        }
+
+        #history{
+            padding: 0;
+        }
+
+        .general-container{
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-container{
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .add-modal h2{
+            padding: 0 10px;
+        }
+
+        .add-modal form{
+            display: flex;
+            flex-direction: column;
+        }
+
+        .add-modal form *{
+            margin: 10px;
+            padding: 10px;
+        }
+
+    </style>
+    <style>
+        .expense-types > li{
+            border-bottom: 2px solid gray;
+            margin: 10px 20px;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .expense-types{
+            list-style: none;
+            padding-inline-start: 0px;
+        }
+
+        .family-list{
+            list-style: none;
+            padding-inline-start: 0px;
+        }
+
+        .family-list > li{
+            border-bottom: 2px solid gray;
+            margin: 10px 20px;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-container{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-container *{
+            margin: 0 10px;
+        }
+
+        .expenses-history,
+        .types-container {
+            max-height: 30vh;
+            overflow-y: auto;
+        }
+
+        .info-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+        }
+
+
+
+        .family-list,
+        .expense-types {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .family-list > li,
+        .expense-types > li {
+            font-size: 20px;
+            border-bottom: 2px solid gray;
+            margin: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+    </style>
+    <style>
+        /* General input styles */
+        input[type="date"],
+        textarea,
+        input[type="text"] {
+            padding: 10px;
+            border: 2px solid #54708A;
+            border-radius: 10px;
+            background-color: #F0F3F7;
+            color: #333;
+            font-family: sans-serif;
+            font-size: 16px;
+            box-shadow: 2px 2px 10px 0px #13131354;
+            box-sizing: border-box;
+        }
+
+        /* Focus styles for inputs */
+        input[type="date"]:focus,
+        textarea:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3A4D61;
+            background-color: #E6E9ED;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+
+        .expense-form {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            flex: 1;
+            justify-content: space-around;
+            width: 100%;
+        }
+
+        .expense-form p {
+            margin-top: 20px;
+        }
+
+        .expense-form button {
+            margin: 20px;
+            padding: 10px;
+            border: none;
+            background-color: #F0F3F7;
+            text-decoration: underline;
+            color: #54708A;
+            cursor: pointer;
+        }
+
+        .submit-button {
+            background-color: #54708A !important;
+            color: white !important;
+            border-radius: 10px !important;
+            text-decoration: none !important;
+        }
+
+
+        select {
+            padding: 10px;
+            border: 2px solid #54708A;
+            border-radius: 10px;
+            background-color: #F0F3F7;
+            color: #333;
+            font-family: sans-serif;
+            font-size: 16px;
+            margin: 10px 0;
+            box-shadow: 2px 2px 10px 0px #13131354;
+            box-sizing: border-box;
+        }
+
+
+        /* Focus styles for select */
+        select:focus {
+            outline: none;
+            border-color: #3A4D61;
+            background-color: #E6E9ED;
+        }
+
+        option {
+            background-color: #F0F3F7;
+            color: #333;
+            font-family: sans-serif;
+            font-size: 16px;
+            padding: 10px;
+        }
+
+        /* Hover and selected styles for option */
+        select option:hover,
+        select option:checked {
+            background-color: #E6E9ED;
+            color: #3A4D61;
+        }
+
+    </style>
+    <style>
+
+
+        .underline-table tbody tr {
+            font-size: 20px;
+            border-bottom: 1px solid gray; /* Change the color and style as needed */
+        }
+
+        .underline-table tbody tr td {
+
+        }
+
+        .custom-table {
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .history{
+            max-height: 100%;
+            padding: 0 !important;
+        }
+
+        .custom-table {
+            background-color: #F0F3F7;
+        }
+
+        .custom-table td, .custom-table th {
+            text-align: center;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            font-size: 20px;
+            padding: 4px 7px;
+        }
+
+        .custom-table .student:hover .bi-trash3 {
+            fill: red;
+        }
+
+        .custom-table tbody tr {
+            border-bottom: 2px solid gray !important;
+        }
+
+        .custom-table tbody{
+            width: 100%;
+        }
+
+        .custom-table tbody tr:last-of-type {
+            border-bottom: 2px solid black !important;
+        }
+
+        .custom-table button {
+            border: none;
+            cursor: pointer;
+        }
+
+        .custom-table tbody tr:nth-of-type(even) button {
+
+        }
+
+        .custom-table .add-student-table-button {
+            width: 100%;
+            height: 100%;
+        }
+
+        @media screen and (max-width: 500px) {
+            .custom-table th,
+            .custom-table td {
+                padding: 3px 4px;
+            }
+
+            .custom-table {
+                margin: 0px 0;
+                max-width: 100%;
+            }
+            body {
+                margin: 0;
+            }
+            td {
+                overflow-wrap: break-word;
+                max-width: 90px;
+            }
+        }
+
+        /* Scrollable table styles */
+        #table-wrapper {
+            height: 89%;
+            overflow-y: auto;
+        }
+
+        #table-scroll {
+            width: 100%;
+            overflow-x: auto;+
+        }
+    </style>
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<div class="general-container">
+    <nav class="nav-container component">
+        <div class="nav-page border-component balance">
+            <p>Balance</p>
+            <p th:text="${userBalance.toString() + '$'}">0$</p>
+        </div>
+
+        <div class="nav-page border-component">
+            <a href="/expenses"><span>Expenses</span></a>
+        </div>
+
+        <div class="nav-page border-component">
+            <a href="/history"><span>History</span></a>
+        </div>
+
+        <div class="nav-page border-component">
+            <a href="/edit"><span>Edit</span></a>
+        </div>
+
+    </nav>
+    <div class="history-container component">
+        <div class="border-component">
+            <div class="info-container">
+                <p>Family</p>
+                <button class="add-button" onclick="openAddFamilyMemberForm()">+</button>
+            </div>
+            <div class="types-container expenses-history ">
+                <ul class="family-list" th:fragment="family-list"  id="familyList">
+                    <li onclick="familyMemberClick(this)" class="family-member" th:data-family-id="${familyMember.id}" th:each="familyMember: ${familyMemberList}" th:text="${familyMember.name}"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-component">
+            <div class="info-container">
+                <p>Types</p>
+                <button class="add-button" onclick="openAddOperationType()">+</button>
+            </div>
+            <div class="types-container">
+                <ul class="expense-types" id="operation-types" th:fragment="category-types">
+                    <li class="income-category" th:each="type: ${incomeCategories}" th:data-category-id="${type.id}" th:text="${type.name}" onclick="incomeCategoryClick(this)"></li>
+                    <li class="expense-category" th:each="type: ${expenseCategories}" th:data-category-id="${type.id}" th:text="${type.name}" onclick="expenseCategoryClick(this)"></li>
+                    <!-- Additional categories here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="history-container component">
+        <div id="history" class="border-component history">
+            <div class="button-container">
+                <button class="standart-button" onclick="showAll()">Show All</button>
+                <button class="standart-button" onclick="showExpenses()">Show Expenses</button>
+                <button class="standart-button" onclick="showIncome()">Show Income</button>
+            </div>
+            <div class="operations-list-container" id="operations-list">
+
+                <table th:fragment="operations-list" id="table-scroll" class="custom-table">
+                    <tbody>
+                    <tr  onclick="operationClick(this)" th:each="operation : ${operations}"  th:data-operation-id="${operation.id}" th:data-operation-type="${operation.operationType}">
+                        <td th:text="${@historyController.operationDelta(operation)}"></td>
+                        <td th:text="${operation.familyMember.name}"></td>
+                        <td th:text="${@historyController.operationTypeSpecificInfo(operation)}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="add-modal modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Edit Operation</h2>
+            <form th:fragment="expenses-form" id="expenses-form" th:action="@{/updateExpense}" th:object="${editExpense}" method="post">
+                <input type="hidden" th:field="*{id}">
+
+                <input th:field="*{delta}" type="number" min="0.01" value="0.00" step="0.01" placeholder="Sum"/>
+                <textarea th:field="*{description}" placeholder="Text"></textarea>
+
+            <select th:field="*{familyMemberId}">
+                <option value="" disabled selected>Select a family member</option>
+                <option th:each="member : ${familyMemberList}" th:value="${member.id}" th:text="${member.name}"></option>
+            </select>
+
+            <select th:field="*{expenseTypeId}">
+                <option value="" disabled selected>Select an expense expenseCategory</option>
+                <option th:each="type : ${expensesCategories}" th:value="${type.id}" th:text="${type.name}"></option>
+            </select>
+
+
+            <input th:field="*{operationDate}" type="date"/>
+
+            <button class="submit-button" type="submit">Save</button>
+            <button class="standart-button">Cancel</button>
+            </form>
+
+            <form class="expense-form" th:fragment="income-form" id="income-form" method="post" th:action="@{/updateIncome}" th:object="${editIncome}">
+                <input type="hidden" th:field="*{id}">
+
+                <input th:field="*{delta}" type="number" min="0.01" value="0.00" step="0.01" placeholder="Sum"/>
+                <textarea th:field="*{description}" placeholder="Text"></textarea>
+
+                <select th:field="*{familyMemberId}">
+                    <option value="" disabled selected>Select a family member</option>
+                    <option th:each="member : ${familyMemberList}" th:value="${member.id}" th:text="${member.name}"></option>
+                </select>
+
+                <select th:field="*{incomeTypeId}">
+                    <option value="" disabled selected>Select an expense expenseCategory</option>
+                    <option th:each="type : ${incomeCategories}" th:value="${type.id}" th:text="${type.name}"></option>
+                </select>
+
+
+                <input th:field="*{operationDate}" type="date"/>
+
+                <button class="submit-button" type="submit">Save</button>
+                <button class="standart-button">Cancel</button>
+            </form>
+
+        </div>
+    </div>
+
+    <div id="addFamilyModal" class="modal">
+        <div class="add-modal modal-content">
+            <span class="close" onclick="closeAddFamilyMember()">&times;</span>
+<!--            <form th:fragment="expenses-form" id="expenses-form" th:action="@{/updateExpense}" th:object="${editExpense}" method="post">-->
+            <h2>Add family member</h2>
+            <form th:fragment="add-family-form" action="#" id="addFamilyForm" th:action="@{/addFamilyMember}"  th:object="${newFamilyMember}" method="post" >
+                <input required type="text" id="familyMemberName" th:field="*{name}" placeholder="Enter family member name"/>
+                <button class="standart-button" type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addCategoryModal" class="modal">
+        <div class="add-modal modal-content">
+            <span class="close" onclick="closeAddType()">&times;</span>
+            <h2>Add operation type</h2>
+            <form id="addOperationForm">
+                <input required type="text" id="operationName" name="name" placeholder="Enter operation name"/>
+                <select id="operationType">
+                    <option value="income" selected>Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+                <button type="button" class="standart-button" onclick="submitForm()">Add</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+
+
+<script>
+    function closeAddType(){
+        document.getElementById("operationName").value = "";
+        $("#addCategoryModal").css('display', 'none');
+    }
+    async function submitForm() {
+        const operationName = document.getElementById('operationName').value;
+        const operationType = document.getElementById('operationType').value;
+        const url = operationType === 'income' ? '/addIncomeCategory' : '/addExpenseCategory';
+
+        if(!operationName){
+            alert("Name cannot be null");
+            return;
+        }
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: operationName }),
+        });
+
+        if (response.ok) {
+            const result = await response.text();
+            // Assuming you want to update a part of the page with the response
+            document.getElementById('operation-types').innerHTML = result;
+        } else {
+            console.error('Failed to add category');
+        }
+        closeAddType();
+    }
+</script>
+<script th:inline="javascript">
+    let categoryRequestId = -1;
+    let familyId = -1;
+    let isExpenseId = false;
+
+    $(document).ready(function() {
+        $(".operation").click(operationClick
+        );
+    });
+
+    function familyMemberClick(e){
+        var familyMemberId = $(e).data("family-id");
+        console.log(familyMemberId)
+        try {
+            familyId = familyMemberId;
+            console.log(familyMemberId)
+            if(categoryRequestId === -1){
+                $.get("/operations/familyMember/" + familyMemberId, function(data) {
+                    document.getElementById("operations-list").innerHTML = data;
+                });
+            }else{
+                const queryParams = {
+                    FamilyUserId: familyId, // Replace with the actual FamilyUserId
+                    categoryId: categoryRequestId // Replace with the actual categoryId
+                };
+                if(isExpenseId){
+                    $.get("/operations/familyUserCategoryExpenses", queryParams, function(data){
+                        document.getElementById("operations-list").innerHTML = data;
+                    });
+                }else{
+                    $.get("/operations/familyUserCategoryIncomes", queryParams, function(data){
+                        document.getElementById("operations-list").innerHTML = data;
+                    });
+                }
+
+            }
+
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    function incomeCategoryClick(e) {
+        console.log(e)
+        var categoryId = $(e).data("category-id");
+        try {
+            isExpenseId = false;
+            console.log(categoryId)
+            if(familyId === -1){
+                categoryRequestId = categoryId;
+                $.get("/operations/incomes/" + categoryId, function(data) {
+                    document.getElementById("operations-list").innerHTML = data;
+                    $(".operation").click(operationClick);
+                });
+
+            }else{
+                categoryRequestId = categoryId;
+
+                const queryParams = {
+                    FamilyUserId: familyId, // Replace with the actual FamilyUserId
+                    categoryId: categoryRequestId // Replace with the actual categoryId
+                };
+                $.get("/operations/familyUserCategoryIncomes", queryParams, function(data){
+                    document.getElementById("operations-list").innerHTML = data;
+                    $(".operation").click(operationClick);
+                });
+            }
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    function expenseCategoryClick(e) {
+        var categoryId = $(e).data("category-id");
+        try {
+            isExpenseId = true;
+            console.log(categoryId)
+            if(familyId === -1){
+                categoryRequestId = categoryId;
+                $.get("/operations/expenses/" + categoryId, function(data) {
+                    document.getElementById("operations-list").innerHTML = data;
+                    $(".operation").click(operationClick);
+                });
+            }else{
+                categoryRequestId = categoryId;
+
+                const queryParams = {
+                    FamilyUserId: familyId, // Replace with the actual FamilyUserId
+                    categoryId: categoryRequestId // Replace with the actual categoryId
+                };
+                $.get("/operations/familyUserCategoryExpenses", queryParams, function(data){
+                    document.getElementById("operations-list").innerHTML = data;
+                    $(".operation").click(operationClick);
+                });
+            }
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    function showAll() {
+        familyId = -1;
+        categoryRequestId = -1;
+        $.get("/operations/all", function(data) {
+            document.getElementById("operations-list").innerHTML = data;
+        });
+
+        document.querySelectorAll(".expense-category").forEach((element)=>{
+            element.style.display = "flex";
+        });
+
+        document.querySelectorAll(".income-category").forEach((element)=>{
+            element.style.display = "flex";
+        });
+    }
+
+    function showIncome() {
+        $.get("/operations/incomes", function(data) {
+            document.getElementById("operations-list").innerHTML = data;
+        });
+
+        document.querySelectorAll(".expense-category").forEach((element)=>{
+            element.style.display = "none";
+        });
+
+        document.querySelectorAll(".income-category").forEach((element)=>{
+            element.style.display = "flex";
+        });
+    }
+
+    function showExpenses() {
+        $.get("/operations/expenses", function(data) {
+            document.getElementById("operations-list").innerHTML = data;
+        });
+
+        document.querySelectorAll(".expense-category").forEach((element)=>{
+            element.style.display = "flex";
+        });
+
+        document.querySelectorAll(".income-category").forEach((element)=>{
+            element.style.display = "none";
+        });
+    }
+
+    function closeModal() {
+        $('#editModal').css('display', 'none');
+    }
+
+    function closeAddFamilyMember(){
+        $('#addFamilyModal').css('display', 'none');
+    }
+
+    function openAddOperationType(){
+        $("#addCategoryModal").css('display', 'flex');
+    }
+
+    function openAddFamilyMemberForm(){
+        $('#addFamilyModal').css('display', 'flex');
+    }
+
+    function openAddTypeForm(){
+
+    }
+
+    $('#addFamilyForm').submit((e)=>{
+        e.preventDefault();
+
+        const familyMemberName = document.getElementById("familyMemberName").value;
+        document.getElementById("familyMemberName").value = "";
+
+        $.post({
+            url: '/addFamilyMember/',
+            contentType: 'application/json',
+            data: JSON.stringify({ name: familyMemberName }),
+            success: function(response) {
+                console.log(response)
+                document.getElementById("familyList").innerHTML = response;
+            },
+            error: function(xhr, status, error) {
+                console.error('Error adding family member:', error);
+            }
+        });
+        closeAddFamilyMember();
+    });
+
+
+    // Handle form submission for editing operation
+    $('#editForm').submit(function(e) {
+        e.preventDefault();
+        var formData = $(this).serialize();
+        closeModal();
+    });
+</script>
+<script th:inline="javascript">
+
+    function editExpense(operationId){
+        $('#income-form').css('display', 'none');
+        $('#expenses-form').css('display', 'flex');
+        $('#editModal').css('display', 'flex');
+
+        $.get("/expenses/" + operationId, function(data) {
+            document.getElementById("expenses-form").innerHTML = data;
+            $(".operation").click(operationClick);
+        });
+    }
+
+    function editIncome(operationId){
+        $('#income-form').css('display', 'flex');
+        $('#expenses-form').css('display', 'none');
+
+        $('#editModal').css('display', 'flex');
+        $.get("/incomes/" + operationId, function(data) {
+            console.log(data);
+            document.getElementById("income-form").innerHTML = data;
+            $(".operation").click(operationClick);
+        });
+    }
+
+    function operationClick(element) {
+        var operationId = $(element).data("operation-id");
+        var operationType = $(element).data("operation-type");
+        console.log(operationType)
+        console.log(element)
+        switch (operationType) {
+            case "EXPENSE":
+                editExpense(operationId);
+                break;
+            case "INCOME":
+                editIncome(operationId);
+                break;
+        }
+    }
+
+    $(".operation").click(operationClick);
+</script>
+
+</body>
+</html>

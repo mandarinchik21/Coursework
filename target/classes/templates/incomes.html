@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Incomes</title>
+    <link rel="stylesheet" th:href="@{/css/expenses.css}" />
+    <link rel="stylesheet" href="../static/expenses.css">
+    <style>
+        .operations-list-container {
+            padding: 0 20px;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+
+        .expenses-history{
+            max-height: 30vh;
+            overflow-y: auto;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="general-container">
+    <nav class="nav-container component">
+        <div class="nav-page border-component balance">
+            <p>Balance</p>
+            <p th:text="${userBalance.toString() + '$'}"></p>
+        </div>
+
+        <div class="nav-page border-component">
+            <a href="/expenses"><span>Expenses</span></a>
+        </div>
+
+        <div class="nav-page border-component">
+            <a href="/history"><span>History</span></a>
+        </div>
+
+        <div class="nav-page border-component">
+            <a href="/edit"><span>Edit</span></a>
+        </div>
+
+    </nav>
+    <div class="history-container component">
+        <div class="border-component">
+            <div class="expenses-history">
+                <p>History</p>
+                <div class="operations-list-container">
+                    <ul class="operations-list">
+                        <li th:each="operation : ${incomes}">
+                            <p th:text="'+' + ${operation.delta} + '$'"> </p>
+                            <p th:text="${operation.incomeType.name}"></p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="diagram border-component">
+            <canvas id="incomesPieChart"></canvas>
+        </div>
+    </div>
+
+    <div class="new-expense component border-component">
+        <div class="form-container">
+            <p>New incomes</p>
+            <form class="expense-form" method="post" th:action="@{/incomes}" th:object="${newExpense}">
+                <input required th:field="*{delta}" type="number" min="0.01" value="0.00" step="0.01" placeholder="Sum"/>
+                <textarea th:field="*{description}" placeholder="Text"></textarea>
+
+                <select required th:field="*{familyMemberId}">
+                    <option value="" disabled selected>Select a family member</option>
+                    <option th:each="member : ${familyMembers}" th:value="${member.id}" th:text="${member.name}"></option>
+                </select>
+
+                <select required th:field="*{incomeTypeId}">
+                    <option value="" disabled selected>Select an expense expenseCategory</option>
+                    <option th:each="type : ${incomesCategories}" th:value="${type.id}" th:text="${type.name}"></option>
+                </select>
+
+
+                <input required th:field="*{operationDate}" type="date"/>
+
+                <button class="submit-button" type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const expensesDataJson = /*[[${incomesDataJson}]]*/ '[]';
+        console.log(expensesDataJson)
+        const expensesData = JSON.parse(expensesDataJson);
+
+        if(expensesData.length === 0){
+            return;
+        }
+        const ctx = document.getElementById('incomesPieChart').getContext('2d');
+
+        const expenseLabels = expensesData.map(expense => expense.incomeType);
+        const expenseAmounts = expensesData.map(expense => expense.delta);
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: expenseLabels,
+                datasets: [{
+                    data: expenseAmounts,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Incomes Distribution'
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

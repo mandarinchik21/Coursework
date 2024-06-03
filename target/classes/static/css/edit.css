@@ -1,0 +1,25 @@
+.expense-types > li{
+    border-bottom: 2px solid black;
+    margin: 10px 20px;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+}
+
+.expense-types{
+    list-style: none;
+    padding-inline-start: 0px;
+}
+
+.family-list{
+    list-style: none;
+    padding-inline-start: 0px;
+}
+
+.family-list > li{
+    border-bottom: 2px solid black;
+    margin: 10px 20px;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+}

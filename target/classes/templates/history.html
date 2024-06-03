@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Incomes</title>
+    <link rel="stylesheet" th:href="@{/css/expenses.css}" />
+    <style>
+
+
+        .underline-table tbody tr {
+            border-bottom: 1px solid #000; /* Change the color and style as needed */
+        }
+
+        .underline-table tbody tr td {
+
+        }
+
+        .custom-table {
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .history{
+            max-height: 100%;
+            padding: 0 !important;
+        }
+
+        .custom-table {
+            background-color: #F0F3F7;
+        }
+
+        .custom-table td, .custom-table th {
+            text-align: center;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            padding: 12px 15px;
+        }
+
+        .custom-table .student:hover .bi-trash3 {
+            fill: red;
+        }
+
+        .custom-table tbody tr {
+            border-bottom: 2px solid black !important;
+        }
+
+        .custom-table tbody{
+            width: 100%;
+        }
+
+        .custom-table tbody tr:last-of-type {
+            border-bottom: 2px solid black !important;
+        }
+
+        .custom-table button {
+            border: none;
+            cursor: pointer;
+        }
+
+        .custom-table tbody tr:nth-of-type(even) button {
+
+        }
+
+        .custom-table .add-student-table-button {
+            width: 100%;
+            height: 100%;
+        }
+
+        @media screen and (max-width: 500px) {
+            .custom-table th,
+            .custom-table td {
+                padding: 3px 4px;
+            }
+
+            .custom-table {
+                margin: 0px 0;
+                max-width: 100%;
+            }
+            body {
+                margin: 0;
+            }
+            td {
+                overflow-wrap: break-word;
+                max-width: 90px;
+            }
+        }
+
+        /* Scrollable table styles */
+        #table-wrapper {
+            height: 89%;
+            overflow-y: auto;
+        }
+
+        #table-scroll {
+            width: 100%;
+            overflow-x: auto;+
+        }
+    </style>
+</head>
+<body>
+<div class="general-container">
+    <nav class="nav-container component">
+        <div class="nav-page border-component balance">
+            <p>Balance</p>
+            <p th:text="${userBalance.toString() + '$'}"></p>
+        </div>
+
+        <div class="nav-page border-component">
+            <a href="/expenses"><span>Expenses</span></a>
+        </div>
+
+        <div class="nav-page border-component">
+            <a href="/history"><span>History</span></a>
+        </div>
+
+        <div class="nav-page border-component">
+            <a href="/edit"><span>Edit</span></a>
+        </div>
+
+    </nav>
+    <div class="history-container component">
+        <div class="expenses-history border-component history">
+            <p>History</p>
+            <div  id="table-wrapper">
+                <table id="table-scroll" class="custom-table">
+                    <tbody>
+                    <tr th:each="operation : ${operations}">
+                        <td th:text="${@historyController.operationDelta(operation)}"></td>
+                        <td th:text="${operation.familyMember.name}"></td>
+                        <td th:text="${#dates.format(operation.operationDate, 'dd-MM-yyyy')}"></td>
+                        <td th:text="${@historyController.operationTypeSpecificInfo(operation)}"></td>
+                        <td>
+                            <button class="delete-btn" th:attr="data-operation-id=${operation.id}">Delete</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const operationId = this.getAttribute('data-operation-id');
+                deleteOperation(operationId);
+            });
+        });
+
+        function deleteOperation(operationId) {
+            fetch('/history?operationId=' + operationId, {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    console.error('Failed to delete operation');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>
